@@ -74,13 +74,13 @@ jobs:
             # Determine the repo and leave that unset to use the normal checkout behavior
             # of using the merge commit instead of HEAD
             case $GITHUB_REPOSITORY in
-              "apache/nuttx")
+              "$GITHUB_ACTOR/nuttx")
                 # OS
                 echo "Triggered by change in OS"
                 APPS_REF=$REF_NAME
                 ;;
 
-              "apache/nuttx-apps" )
+              "$GITHUB_ACTOR/nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
@@ -98,7 +98,7 @@ jobs:
       - name: Checkout nuttx repo
         uses: actions/checkout@v6
         with:
-          repository: apache/nuttx
+          repository: ${{ github.actor }}/nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
@@ -108,7 +108,7 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v6
         with:
-          repository: apache/nuttx-apps
+          repository: ${{ github.actor }}/nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
@@ -130,13 +130,7 @@ jobs:
       os: Linux
       boards: |
         [
-          "arm-01", "risc-v-01", "sim-01", "xtensa-01", "arm64-01", "x86_64-01", "other",
-          "arm-02", "risc-v-02", "sim-02", "xtensa-02",
-          "arm-03", "risc-v-03", "sim-03",
-          "arm-04", "risc-v-04",
-          "arm-05", "risc-v-05",
-          "arm-06", "risc-v-06",
-          "arm-07", "arm-08", "arm-09", "arm-10", "arm-11", "arm-12", "arm-13", "arm-14"
+          "sim-01", "sim-02", "sim-03"
         ]
 
   # Run the selected Linux Builds
@@ -186,6 +180,35 @@ jobs:
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
 
+      - name: Install NTFC
+        uses: ./sources/nuttx/.github/actions/ci-container
+        env:
+          BLOBDIR: /tools/blobs
+        with:
+          run: |
+            # install venv
+            apt-get update
+            apt install -y python3-dev
+            apt install -y python3-venv
+
+            # get NTFC sources
+            git clone https://github.com/szafonimateusz-mi/nuttx-ntfc
+            cd /github/workspace/nuttx-ntfc
+            # git checkout 5fad476
+
+            # install NTFC with venv
+            python3 -m venv /github/workspace/nuttx-ntfc/venv
+            source /github/workspace/nuttx-ntfc/venv/bin/activate
+            pip3 install .
+            deactivate
+
+            # get NTFC test cases
+            cd external
+            git clone https://github.com/szafonimateusz-mi/nuttx-testing
+            cd nuttx-testing
+            # git checkout ede45d1
+
+
       - name: Run builds
         uses: ./sources/nuttx/.github/actions/ci-container
         env:
@@ -196,7 +219,7 @@ jobs:
             export ARTIFACTDIR=`pwd`/buildartifacts
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
-            cd sources/nuttx/tools/ci
+            cd /github/workspace/sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else

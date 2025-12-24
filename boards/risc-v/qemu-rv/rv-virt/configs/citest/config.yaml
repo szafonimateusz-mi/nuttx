@@ -1,0 +1,13 @@
+config:
+  cwd: '/github/workspace/sources/'
+
+product:
+  name: "rv-virt"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      exec_path: 'qemu-system-riscv32'
+      exec_args: '-semihosting -M virt,aclint=on -smp 1 -bios none -nographic'
+      conf_path: '/github/workspace/sources/nuttx/.config'
+      elf_path: '/github/workspace/sources/nuttx/nuttx'
