@@ -1,0 +1,11 @@
+config:
+  cwd: '/github/workspace/sources/'
+
+product:
+  name: "ntfc-sim"
+  cores:
+    core0:
+      name: 'main'
+      device: 'sim'
+      conf_path: '/github/workspace/sources/nuttx/.config'
+      elf_path: '/github/workspace/sources/nuttx/nuttx'
