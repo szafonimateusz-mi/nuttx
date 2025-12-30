@@ -1,5 +1,5 @@
 config:
-  cwd: '/github/workspace/sources/'
+  cwd: './'
   timeout_session: 6000
 
 product:
@@ -8,5 +8,5 @@ product:
     core0:
       name: 'main'
       device: 'sim'
-      conf_path: '/github/workspace/sources/nuttx/.config'
-      elf_path: '/github/workspace/sources/nuttx/nuttx'
+      conf_path: './.config'
+      elf_path: './nuttx'

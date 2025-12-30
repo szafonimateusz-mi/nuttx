@@ -23,17 +23,19 @@
 
 set -o xtrace
 
-# start from NTFC dir
+# start from nuttx dir
 olddir=$(pwd)
-cd ${NTFCDIR}
+nuttdir=${CURRENTCONFDIR}/../../../../../../
+cd ${nuttdir}
 
 # enable venv
-source ./venv/bin/activate
+source ${NTFCDIR}/venv/bin/activate
 
 # run NTFC
 confpath=${CURRENTCONFDIR}/config.yaml
 jsonconf=${CURRENTCONFDIR}/session.json
-python3 -m ntfc test --confpath=${confpath} --jsonconf=${jsonconf}
+testpath=${NTFCDIR}/external/nuttx-testing
+python3 -m ntfc test --testpath=${testpath} --confpath=${confpath} --jsonconf=${jsonconf}
 
 ret="$?"
 echo $ret
